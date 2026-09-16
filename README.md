@@ -82,20 +82,33 @@ docker version
 
 ## 3. oMLX installieren
 
-### Empfohlene Variante: native macOS-App
+### Empfohlene Variante: Homebrew
 
-Für einen normalen Anwender ist die signierte macOS-App am einfachsten. Die oMLX-App enthält die benötigte Umgebung, installiert einen CLI-Shim unter `~/.omlx/bin/omlx` und führt durch Modellverzeichnis, Serverstart und Modelldownload.
+Für dieses Setup wird die Installation über Homebrew empfohlen. Dadurch lässt sich oMLX bequem über das Terminal installieren, als Hintergrunddienst starten und später mit Homebrew aktualisieren.
 
-1. Die aktuelle `.dmg` von der offiziellen oMLX-Projektseite herunterladen.
-2. oMLX nach **Programme** ziehen.
-3. oMLX starten.
-4. Als Modellverzeichnis den Standard übernehmen:
+Zunächst das oMLX-Repository zu Homebrew hinzufügen:
+
+```bash
+brew tap jundot/omlx https://github.com/jundot/omlx
+```
+
+Anschließend oMLX installieren:
+
+```bash
+brew install jundot/omlx/omlx
+```
+
+Den oMLX-Dienst starten:
+
+```bash
+omlx start
+```
+
+Das standardmäßige Modellverzeichnis ist:
 
 ```text
 ~/.omlx/models
 ```
-
-5. Den lokalen Server starten.
 
 Das Admin-Interface ist anschließend erreichbar unter:
 
@@ -109,20 +122,42 @@ Eine einfache eingebaute Chat-Oberfläche gibt es unter:
 http://localhost:8000/admin/chat
 ```
 
-### Alternative: Homebrew
-
-```bash
-brew tap jundot/omlx https://github.com/jundot/omlx
-brew install jundot/omlx/omlx
-omlx start
-```
-
-Status prüfen:
+Status und API prüfen:
 
 ```bash
 brew services info omlx
-curl http://127.0.0.1:8000/v1/models | jq
+curl -s http://127.0.0.1:8000/v1/models | jq
 ```
+
+Falls der Dienst nicht erreichbar ist, oMLX neu starten:
+
+```bash
+omlx restart
+```
+
+Die Protokolle können je nach Installation an einem der folgenden Orte liegen:
+
+```bash
+tail -f ~/.omlx/logs/server.log
+```
+
+Alternativ:
+
+```bash
+tail -f "$(brew --prefix)/var/log/omlx.log"
+```
+
+### Alternative: native macOS-App
+
+Falls eine grafische Installation bevorzugt wird, kann stattdessen die signierte oMLX-App verwendet werden:
+
+1. Die aktuelle `.dmg` von der offiziellen oMLX-Projektseite herunterladen.
+2. oMLX nach **Programme** ziehen.
+3. oMLX starten.
+4. Als Modellverzeichnis `~/.omlx/models` übernehmen.
+5. Den lokalen Server über die App starten.
+
+> Es sollte nur eine Installationsvariante aktiv verwendet werden. Läuft oMLX gleichzeitig über Homebrew und über die App, kann es zu einem Portkonflikt auf Port `8000` kommen.
 
 ---
 
@@ -225,8 +260,8 @@ grep -iE "mtp|lightning|accepted|draft" ~/.omlx/logs/server.log | tail -50
 
 Open WebUI läuft bequem als Docker-Container. Ein persistentes Volume speichert Benutzer, Chats und Einstellungen.
 
-### 6.1 Schlüssel erzeugen
-
+### 6.1 Schlüssel erzeugen (Optional)
+Im Terminal
 ```bash
 WEBUI_SECRET_KEY="$(openssl rand -hex 32)"
 echo "$WEBUI_SECRET_KEY"
